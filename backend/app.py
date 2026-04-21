@@ -52,7 +52,7 @@ def download_video_from_url(url: str, output_path: str):
 async def process_video(
     video: UploadFile = File(None),
     video_url: str = Form(None),
-    api_key: str = Form("AIzaSyDlJwxwtoEUsKgXpI1uJEhzCGLo2ls8Ahc"),
+    api_key: str = Form(""),
     style: str = Form("genz"),
     sys_password: str = Form("") # Nhận mật khẩu từ web gửi lên
 ):
