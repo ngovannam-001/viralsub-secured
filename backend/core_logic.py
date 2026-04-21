@@ -145,7 +145,7 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
         subprocess.run([
             "ffmpeg", "-y", "-i", video_path, 
             "-vn", # Bỏ hình ảnh
-            "-acodec", "libmp3lame", "-ab", "128k", # Chuyển thành mp3 chất lượng 128kbps
+            "-acodec", "libmp3lame", "-ab", "64k", # Chuyển thành mp3 chất lượng 128kbps
             audio_path
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
     except Exception as e:
