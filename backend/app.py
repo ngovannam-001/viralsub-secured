@@ -1,11 +1,25 @@
+import sys
+import os
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import shutil
-import os
 import uuid
 import yt_dlp
-from backend.core_logic import run_subtitle_pipeline
+
+# --- ĐOẠN CODE "THẦN THÁNH" FIX LỖI PATH ---
+# Lấy đường dẫn của thư mục hiện tại (thư mục backend)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Thêm nó vào hệ thống tìm kiếm của Python
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+# Bây giờ import sẽ luôn chạy được
+from core_logic import run_subtitle_pipeline
+# ------------------------------------------
+
+#app = FastAPI(title="ViralSub API - Secured")
+# ... (giữ nguyên các phần code bên dưới)
 
 app = FastAPI(title="ViralSub API - Secured")
 
