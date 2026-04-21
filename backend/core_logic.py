@@ -1,10 +1,10 @@
-import whisper
 import os
 import time
 import sys
 import re
 from google import genai
 from google.genai import types
+from groq import Groq # <--- Đã thêm thư viện Groq
 
 try:
     sys.stdout.reconfigure(encoding='utf-8') 
@@ -106,40 +106,61 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
         raise FileNotFoundError(f"❌ Không tìm thấy file: {video_path}")
         
     client = genai.Client(api_key=api_key)
-    model = whisper.load_model("tiny") # Hoặc "tiny" nếu server yếu
     
-    result = model.transcribe(
-        video_path, 
-        language="zh", 
-        fp16=False,
-        condition_on_previous_text=True, 
-        word_timestamps=True,            
-        initial_prompt="哈喽大家",       
-        temperature=(0.0, 0.2, 0.4),
-        compression_ratio_threshold=2.4, 
-        logprob_threshold=-1.0,          
-        no_speech_threshold=0.6          
-    )
+    # ---------------------------------------------------------
+    # GỌI GROQ API SIÊU TỐC THAY VÌ CHẠY WHISPER TRÊN SERVER
+    # ---------------------------------------------------------
+    groq_api_key = os.environ.get("GROQ_API_KEY")
+    if not groq_api_key:
+        raise ValueError("❌ Lỗi: Chưa cài đặt GROQ_API_KEY trong Environment variables của Render.")
+        
+    print("⏳ Đang gửi file lên Groq để bóc băng (Super Fast)...")
+    groq_client = Groq(api_key=groq_api_key)
+    
+    try:
+        with open(video_path, "rb") as file:
+            # Tham số response_format="verbose_json" giúp trả về timestamp y hệt Whisper cũ
+            result = groq_client.audio.transcriptions.create(
+                file=(os.path.basename(video_path), file.read()),
+                model="whisper-large-v3-turbo", 
+                response_format="verbose_json",
+                language="zh", 
+                temperature=0.0
+            )
+    except Exception as e:
+        raise RuntimeError(f"❌ Lỗi khi bóc băng bằng Groq: {str(e)}")
     
     raw_chinese_content = ""
     valid_index = 1
-    for segment in result["segments"]:
-        original = segment["text"].strip()
-        duration = segment['end'] - segment['start']
+    
+    # Xử lý kết quả trả về từ Groq
+    segments = result.segments if hasattr(result, 'segments') else result.get("segments", [])
+    
+    for segment in segments:
+        original = getattr(segment, 'text', '') if hasattr(segment, 'text') else segment.get('text', '')
+        original = original.strip()
+        
+        start_time = getattr(segment, 'start', 0.0) if hasattr(segment, 'start') else segment.get('start', 0.0)
+        end_time = getattr(segment, 'end', 0.0) if hasattr(segment, 'end') else segment.get('end', 0.0)
+        
+        duration = end_time - start_time
+        
+        # Logic lọc rác cũ của bạn
         if duration > 15.0 or (len(original) > 20 and len(set(original)) < (len(original) / 3)) or len(original) < 2:
             continue
             
-        start = format_timestamp(segment['start'])
-        end = format_timestamp(segment['end'])
-        block = f"{valid_index}\n{start} --> {end}\n{original}\n\n"
+        start_str = format_timestamp(start_time)
+        end_str = format_timestamp(end_time)
+        block = f"{valid_index}\n{start_str} --> {end_str}\n{original}\n\n"
         raw_chinese_content += block
         valid_index += 1
         
     if not raw_chinese_content:
-        raise ValueError("Lỗi: Video không có giọng nói nào!")
+        raise ValueError("Lỗi: Video không có giọng nói nào hoặc quá ngắn!")
         
+    # Chuyển qua Gemini dịch
     final_polished_content = process_srt_in_chunks(client, raw_chinese_content, style)
     if not final_polished_content:
-        raise RuntimeError("⚠️ Quá trình xử lý AI thất bại.")
+        raise RuntimeError("⚠️ Quá trình xử lý AI (Gemini) thất bại.")
         
     return raw_chinese_content, final_polished_content
