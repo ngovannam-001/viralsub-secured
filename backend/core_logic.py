@@ -105,7 +105,12 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
     if not os.path.exists(video_path):
         raise FileNotFoundError(f"❌ Không tìm thấy file: {video_path}")
         
-    client = genai.Client(api_key=api_key)
+   # Lấy Key khách nhập trên web, nếu khách không nhập thì tự động lấy Key cài sẵn trong Render
+    final_gemini_key = api_key if api_key else os.environ.get("GEMINI_API_KEY")
+    if not final_gemini_key:
+        raise ValueError("❌ Lỗi: Chưa cung cấp API Key của Gemini!")
+        
+    client = genai.Client(api_key=final_gemini_key)
     
     # ---------------------------------------------------------
     # GỌI GROQ API SIÊU TỐC THAY VÌ CHẠY WHISPER TRÊN SERVER
