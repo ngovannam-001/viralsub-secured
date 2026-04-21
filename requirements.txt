@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 python-multipart
-#openai-whisper
 google-genai
 aiofiles
 yt-dlp
