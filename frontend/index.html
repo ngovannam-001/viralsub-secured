@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViralSub - Secured Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-[#f5f7fa] dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+    
+    <header class="bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-50 border-b dark:border-slate-700 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer">
+                <div class="w-10 h-10 bg-[#2c3e50] dark:bg-blue-600 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-film text-xl"></i></div>
+                <span class="font-bold text-2xl tracking-tight">ViralSub <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full uppercase ml-2">Private</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="themeToggle" class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6 relative">
+            
+            <div class="flex border-b border-slate-200 dark:border-slate-700 mb-6">
+                <button onclick="switchTab('file')" id="tabFile" class="py-2 px-4 border-b-2 border-blue-600 text-blue-600 font-semibold transition">📁 Upload File</button>
+                <button onclick="switchTab('url')" id="tabUrl" class="py-2 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition">🔗 Dán URL Video</button>
+            </div>
+
+            <form id="uploadForm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="flex items-center bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 px-3 py-2">
+                        <i class="fa-solid fa-lock text-red-400 mr-2"></i>
+                        <input type="password" id="sysPassword" placeholder="Nhập Mật Khẩu Hệ Thống..." class="bg-transparent w-full outline-none text-sm font-bold text-red-700 dark:text-red-400 placeholder-red-300 dark:placeholder-red-800" required>
+                    </div>
+
+                    <div class="flex items-center bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2">
+                        <i class="fa-solid fa-key text-slate-400 mr-2"></i>
+                        <input type="password" id="apiKey" placeholder="Gemini API Key (Tùy chọn)..." class="bg-transparent w-full outline-none text-sm dark:text-white">
+                    </div>
+
+                    <div class="flex items-center bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2">
+                        <i class="fa-solid fa-masks-theater text-slate-400 mr-2"></i>
+                        <select id="subStyle" class="bg-transparent w-full outline-none text-sm dark:text-white dark:bg-slate-700">
+                            <option value="genz">Style: GenZ (Bắt trend)</option>
+                            <option value="normal">Style: Vlogger (Gần gũi)</option>
+                            <option value="pro">Style: Chuyên gia (Nghiêm túc)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="areaFile" class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700/30 hover:bg-blue-50 dark:hover:bg-slate-700 transition cursor-pointer flex flex-col items-center justify-center py-12" onclick="document.getElementById('videoFile').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-3"></i>
+                    <p class="font-medium">Bấm để tải video lên (.mp4)</p>
+                    <p class="text-xs text-slate-400 mt-1" id="fileNameDisplay">Tối đa 50MB</p>
+                    <input id="videoFile" type="file" class="hidden" accept="video/mp4">
+                </div>
+
+                <div id="areaUrl" class="hidden">
+                    <input type="text" id="videoUrl" placeholder="Dán link TikTok, Douyin, YouTube vào đây..." class="w-full px-4 py-4 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 outline-none focus:border-blue-500 dark:text-white">
+                </div>
+
+                <div class="flex justify-end mt-6">
+                    <button type="submit" id="submitBtn" class="bg-[#2c3e50] dark:bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-opacity-90 transition flex items-center gap-2 shadow-md">
+                        <i class="fa-solid fa-unlock-keyhole"></i> Mở Khóa & Xử Lý
+                    </button>
+                </div>
+            </form>
+
+            <div id="loading" class="hidden absolute inset-0 bg-white/90 dark:bg-slate-800/90 rounded-2xl flex flex-col items-center justify-center z-10">
+                <div class="spinner border-4 border-slate-200 border-t-[#2c3e50] dark:border-t-blue-500 rounded-full w-10 h-10 animate-spin mb-3"></div>
+                <p class="font-medium text-slate-700 dark:text-slate-200">Hệ thống đang bóc băng video...</p>
+            </div>
+        </div>
+
+        <div id="videoPreview" class="hidden mb-6 bg-black rounded-2xl overflow-hidden shadow-lg w-full max-w-2xl mx-auto border border-slate-700">
+            <video id="player" controls class="w-full h-auto max-h-[400px]">Trình duyệt không hỗ trợ video.</video>
+        </div>
+
+        <div id="resultArea" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[500px]">
+                <div class="border-b border-slate-100 dark:border-slate-700 px-5 py-3 flex justify-between items-center bg-slate-50 dark:bg-slate-900 rounded-t-2xl">
+                    <span class="font-bold text-slate-700 dark:text-slate-300">🇨🇳 Trung (Gốc)</span>
+                </div>
+                <div class="p-5 flex-grow flex flex-col">
+                    <textarea id="zhSub" readonly class="flex-grow w-full resize-none outline-none font-mono text-sm custom-scrollbar bg-transparent dark:text-slate-300"></textarea>
+                    <div class="mt-4 pt-3 flex gap-2 justify-end border-t border-slate-100 dark:border-slate-700">
+                        <button onclick="downloadFile('zhSub', 'sub_zh.txt')" class="px-3 py-1.5 text-xs bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 font-medium">.TXT</button>
+                        <button onclick="downloadFile('zhSub', 'sub_zh.srt')" class="px-4 py-1.5 text-sm bg-[#2c3e50] dark:bg-slate-600 text-white rounded font-medium hover:bg-opacity-90">Tải .SRT</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[500px]">
+                <div class="border-b border-slate-100 dark:border-slate-700 px-5 py-3 flex justify-between items-center bg-blue-50 dark:bg-blue-900/30 rounded-t-2xl">
+                    <span class="font-bold text-blue-700 dark:text-blue-400">🇻🇳 Việt Nam</span>
+                </div>
+                <div class="p-5 flex-grow flex flex-col">
+                    <textarea id="viSub" readonly class="flex-grow w-full resize-none outline-none font-mono text-sm custom-scrollbar bg-transparent dark:text-slate-300"></textarea>
+                    <div class="mt-4 pt-3 flex gap-2 justify-end border-t border-slate-100 dark:border-slate-700">
+                        <button onclick="downloadFile('viSub', 'sub_vi.txt')" class="px-3 py-1.5 text-xs bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 font-medium">.TXT</button>
+                        <button onclick="downloadFile('viSub', 'sub_vi.srt')" class="px-4 py-1.5 text-sm bg-blue-600 text-white rounded font-medium hover:bg-blue-700">Tải .SRT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+    <script src="script.js"></script>
+</body>
+</html>
