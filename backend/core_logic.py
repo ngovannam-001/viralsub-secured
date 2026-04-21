@@ -106,7 +106,7 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
         raise FileNotFoundError(f"❌ Không tìm thấy file: {video_path}")
         
     client = genai.Client(api_key=api_key)
-    model = whisper.load_model("small") # Hoặc "tiny" nếu server yếu
+    model = whisper.load_model("tiny") # Hoặc "tiny" nếu server yếu
     
     result = model.transcribe(
         video_path, 
