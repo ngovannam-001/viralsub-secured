@@ -5,7 +5,7 @@ import shutil
 import os
 import uuid
 import yt_dlp
-from core_logic import run_subtitle_pipeline
+from backend.core_logic import run_subtitle_pipeline
 
 app = FastAPI(title="ViralSub API - Secured")
 
