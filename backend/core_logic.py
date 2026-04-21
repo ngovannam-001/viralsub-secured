@@ -50,20 +50,29 @@ def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="g
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-1.5-flash', # Chuyển sang 1.5 Flash cho ổn định 100%
                 contents=srt_chunk,
                 config=types.GenerateContentConfig(
                     system_instruction=sys_instruct,
                     temperature=0.2,
                 )
             )
+            
+            # Đề phòng Google từ chối dịch vì tưởng nhầm là nội dung vi phạm
+            if not response or not hasattr(response, 'text') or not response.text:
+                print(f"⚠️ Gemini trả về kết quả rỗng (Có thể do bộ lọc Safety).")
+                raise ValueError("Kết quả trả về rỗng")
+
             result_text = response.text.replace("```srt", "").replace("```", "").strip()
             if re.search(r'[\u4e00-\u9fff]', result_text):
                 time.sleep(3)
                 continue 
             return result_text 
         except Exception as e:
+            # IN LỖI CHI TIẾT RA RENDER ĐỂ BẮT BỆNH NẾU VẪN TẠCH
             error_msg = str(e)
+            print(f"❌ LỖI GEMINI (Lần thử {attempt + 1}): {error_msg}")
+            
             if "503" in error_msg or "429" in error_msg or "quota" in error_msg.lower():
                 wait_time = 15 * (attempt + 1)
                 time.sleep(wait_time)
@@ -105,7 +114,7 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
     if not os.path.exists(video_path):
         raise FileNotFoundError(f"❌ Không tìm thấy file: {video_path}")
         
-   # Lấy Key khách nhập trên web, nếu khách không nhập thì tự động lấy Key cài sẵn trong Render
+    # Lấy Key khách nhập trên web, nếu khách không nhập thì tự động lấy Key cài sẵn trong Render
     final_gemini_key = api_key if api_key else os.environ.get("GEMINI_API_KEY")
     if not final_gemini_key:
         raise ValueError("❌ Lỗi: Chưa cung cấp API Key của Gemini!")
