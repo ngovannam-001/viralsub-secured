@@ -57,7 +57,7 @@ def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="g
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash', # Chuyển sang 2.0 Flash cho ổn định, đỡ bị 503
+                model='gemini-2.5-flash-lite', # Chuyển sang 2.0 Flash cho ổn định, đỡ bị 503
                 contents=srt_chunk,
                 config=types.GenerateContentConfig(
                     system_instruction=sys_instruct,
