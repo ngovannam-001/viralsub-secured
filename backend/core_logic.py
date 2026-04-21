@@ -2,9 +2,10 @@ import os
 import time
 import sys
 import re
+import subprocess # Thêm thư viện chạy lệnh FFmpeg
 from google import genai
 from google.genai import types
-from groq import Groq # <--- Đã thêm thư viện Groq
+from groq import Groq
 
 try:
     sys.stdout.reconfigure(encoding='utf-8') 
@@ -21,16 +22,22 @@ def format_timestamp(seconds):
 
 def get_style_instruction(style_type):
     if style_type == "genz":
-        return """- XƯNG HÔ: Đại từ ngôi 1 → "Chồng", ngôi 2 → "các Vợ". TUYỆT ĐỐI KHÔNG dùng: tui, tôi, mình, bạn.
-- Chèn từ khóa mồi: layout, chân ái, đỉnh chóp, cứu luôn, auto đẹp.
-- Dịch kiểu hơi láo láo, nghịch nghịch GenZ. TỐI ĐA 8–12 từ/subtitle."""
+        return """- XƯNG HÔ: Ngôi 1 → "Mình" hoặc "Tui", Ngôi 2 → "Mọi người" hoặc "Các bác".
+- VĂN PHONG (Bắt trend): Dịch sát nghĩa gốc nhưng diễn đạt theo ngôn ngữ mạng Việt Nam (hài hước, gần gũi, tự nhiên). 
+- TỪ VỰNG: Linh hoạt chèn các từ lóng phổ biến hiện nay (ví dụ: xịn xò, chê, đỉnh chóp, ố dề, u là trời, trầm cảm...) NẾU phù hợp với ngữ cảnh. TUYỆT ĐỐI không gò bó vào riêng ngành makeup.
+- ĐỘ DÀI: TỐI ĐA 8–12 từ/subtitle."""
+
     elif style_type == "pro":
-        return """- XƯNG HÔ: Đại từ ngôi 1 → "Tôi", ngôi 2 → "Các bạn".
-- Văn phong chuyên nghiệp, lịch sự, rõ ràng, phù hợp làm video hướng dẫn, bản tin.
-- Dịch chuẩn nghĩa, không dùng tiếng lóng. TỐI ĐA 10–14 từ/subtitle."""
-    else: # Normal
-        return """- XƯNG HÔ: Đại từ ngôi 1 → "Mình", ngôi 2 → "Mọi người".
-- Văn phong tự nhiên, gần gũi, như một Vlogger tâm sự. TỐI ĐA 10–12 từ/subtitle."""
+        return """- XƯNG HÔ: Ngôi 1 → "Tôi", Ngôi 2 → "Các bạn".
+- VĂN PHONG (Chuyên nghiệp): Chuẩn mực, lịch sự, rõ ràng. Phù hợp làm bản tin, video giáo dục, podcast kiến thức.
+- TỪ VỰNG: Bám sát 100% nghĩa gốc. Tuyệt đối không dùng tiếng lóng. Dùng từ ngữ phổ thông, dễ hiểu.
+- ĐỘ DÀI: TỐI ĐA 10–14 từ/subtitle."""
+
+    else: # Normal / Việt Hóa Tự Nhiên
+        return """- XƯNG HÔ: Ngôi 1 → "Mình", Ngôi 2 → "Mọi người".
+- VĂN PHONG (Thuần Việt): DỊCH CHUẨN XÁC 100% NGHĨA GỐC NHƯNG CÂU CÚ PHẢI THUẦN VIỆT. Đọc lên phải mượt mà như người Việt đang nói chuyện với nhau.
+- TỪ VỰNG: CẤM dịch kiểu "Word-by-word" (Dịch thô cứng từ chữ sang chữ). Ưu tiên sử dụng cách diễn đạt, thành ngữ, cụm từ quen thuộc trong đời sống hàng ngày của người Việt Nam.
+- ĐỘ DÀI: TỐI ĐA 10–12 từ/subtitle."""
 
 def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="genz", max_retries=5):
     print(f"   ⏳ Đang gửi AI dịch Khúc {chunk_index}/{total_chunks} (Style: {style})...")
@@ -50,7 +57,7 @@ def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="g
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash-lite', # Chuyển sang 1.5 Flash cho ổn định 100%
+                model='gemini-2.0-flash', # Chuyển sang 2.0 Flash cho ổn định, đỡ bị 503
                 contents=srt_chunk,
                 config=types.GenerateContentConfig(
                     system_instruction=sys_instruct,
@@ -122,27 +129,46 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
     client = genai.Client(api_key=final_gemini_key)
     
     # ---------------------------------------------------------
-    # GỌI GROQ API SIÊU TỐC THAY VÌ CHẠY WHISPER TRÊN SERVER
+    # GỌI GROQ API SIÊU TỐC
     # ---------------------------------------------------------
     groq_api_key = os.environ.get("GROQ_API_KEY")
     if not groq_api_key:
         raise ValueError("❌ Lỗi: Chưa cài đặt GROQ_API_KEY trong Environment variables của Render.")
         
-    print("⏳ Đang gửi file lên Groq để bóc băng (Super Fast)...")
     groq_client = Groq(api_key=groq_api_key)
     
+    print("⏳ Đang tách âm thanh ra khỏi video cho nhẹ (Bypass giới hạn 25MB)...")
+    audio_path = video_path + ".mp3"
+    
     try:
-        with open(video_path, "rb") as file:
-            # Tham số response_format="verbose_json" giúp trả về timestamp y hệt Whisper cũ
+        # Dùng ffmpeg tách riêng phần tiếng (mp3) ra, file sẽ nhẹ đi 10 lần
+        subprocess.run([
+            "ffmpeg", "-y", "-i", video_path, 
+            "-vn", # Bỏ hình ảnh
+            "-acodec", "libmp3lame", "-ab", "128k", # Chuyển thành mp3 chất lượng 128kbps
+            audio_path
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+    except Exception as e:
+        raise RuntimeError("❌ Lỗi khi tách âm thanh. Hệ thống thiếu ffmpeg.")
+
+    print("⏳ Đang gửi file ÂM THANH lên Groq để bóc băng (Super Fast)...")
+    try:
+        with open(audio_path, "rb") as file:
+            # Gửi file MP3 (cực nhẹ) thay vì file MP4
             result = groq_client.audio.transcriptions.create(
-                file=(os.path.basename(video_path), file.read()),
+                file=(os.path.basename(audio_path), file.read()),
                 model="whisper-large-v3-turbo", 
                 response_format="verbose_json",
                 language="zh", 
                 temperature=0.0
             )
     except Exception as e:
+        if os.path.exists(audio_path): os.remove(audio_path) # Dọn rác nếu lỗi
         raise RuntimeError(f"❌ Lỗi khi bóc băng bằng Groq: {str(e)}")
+        
+    # Xử lý xong thì xóa file mp3 tạm đi để tránh rác server
+    if os.path.exists(audio_path): 
+        os.remove(audio_path)
     
     raw_chinese_content = ""
     valid_index = 1
@@ -159,7 +185,7 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
         
         duration = end_time - start_time
         
-        # Logic lọc rác cũ của bạn
+        # Logic lọc rác
         if duration > 15.0 or (len(original) > 20 and len(set(original)) < (len(original) / 3)) or len(original) < 2:
             continue
             
