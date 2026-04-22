@@ -325,32 +325,37 @@
 
         // BỘ CỨU HỘ SRT: ÉP CHUẨN ĐỊNH DẠNG 100% CHO CAPCUT
         document.getElementById('btnDownload').onclick = () => {
-            if (!rawViSrtData) return alert('Chưa có dữ liệu để tải!');
+            // Lấy toàn bộ các khối hiển thị Sub từ màn hình giao diện
+            const viContentDiv = document.getElementById('viContent');
+            const subBlocks = viContentDiv.querySelectorAll('div.p-3');
             
-            let fixedSrt = "";
-            const blocks = rawViSrtData.split('\n\n');
-            let counter = 1;
+            if (subBlocks.length === 0 || !rawViSrtData) return alert('Chưa có dữ liệu để tải!');
+            
+            let finalSrt = "";
+            
+            // Quét từng khối Sub trên màn hình và tự động đánh số
+            subBlocks.forEach((block, index) => {
+                // 1. Lấy thời gian từ thẻ span
+                const timeStr = block.querySelector('span').innerText.trim();
+                
+                // 2. Lấy nội dung chữ từ thẻ p, chuyển <br> thành xuống dòng chuẩn
+                let textStr = block.querySelector('p').innerHTML.replace(/<br\s*[\/]?>/gi, '\n');
+                
+                // Lọc bỏ các mã HTML thừa để chữ sạch 100%
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = textStr;
+                textStr = (tempDiv.textContent || tempDiv.innerText || "").trim();
 
-            blocks.forEach(block => {
-                const lines = block.split('\n').map(l => l.trim()).filter(l => l !== '');
-                if (lines.length >= 2) {
-                    const timeIndex = lines.findIndex(l => l.includes('-->'));
-                    if (timeIndex !== -1 && lines.length > timeIndex) {
-                        const time = lines[timeIndex];
-                        const text = lines.slice(timeIndex + 1).join('\n');
-                        // Ép buộc ghi đủ: Số thứ tự -> Thời gian -> Chữ -> Dòng trống
-                        fixedSrt += `${counter}\n${time}\n${text}\n\n`;
-                        counter++;
-                    }
-                }
+                // 3. Ráp lại chuẩn format CapCut: SỐ -> THỜI GIAN -> CHỮ -> DÒNG TRỐNG
+                finalSrt += `${index + 1}\n${timeStr}\n${textStr}\n\n`;
             });
 
-            // \ufeff là mã BOM UTF-8 chống lỗi font tiếng Việt
-            const blob = new Blob(["\ufeff" + fixedSrt.trim()], { type: 'text/srt;charset=utf-8' });
+            // 4. Ép mã \ufeff (UTF-8 BOM) để chống lỗi font Tiếng Việt
+            const blob = new Blob(["\ufeff" + finalSrt.trim()], { type: 'text/srt;charset=utf-8' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'ViralSub_Viet.srt';
+            a.download = 'ViralSub_CapCut_Chuan.srt';
             a.click();
         };
     </script>
