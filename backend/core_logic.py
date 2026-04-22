@@ -2,7 +2,7 @@ import os
 import time
 import sys
 import re
-import subprocess # Thêm thư viện chạy lệnh FFmpeg
+import subprocess
 from google import genai
 from google.genai import types
 from groq import Groq
@@ -20,30 +20,31 @@ def format_timestamp(seconds):
     millis = int((seconds - int(seconds)) * 1000)
     return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
 
-def get_style_instruction(style_type):
+def get_style_instruction(style_type, lang="vi"):
+    # Xác định ngôn ngữ đích dựa trên tham số lang
+    target_lang = "Tiếng Việt" if lang == "vi" else "Tiếng Anh (English)"
+    
     if style_type == "genz":
-        return """- XƯNG HÔ: Ngôi 1 → "Mình" hoặc "Tui", Ngôi 2 → "Mọi người" hoặc "Các bác".
-- VĂN PHONG (Bắt trend): Dịch sát nghĩa gốc nhưng diễn đạt theo ngôn ngữ mạng Việt Nam (hài hước, gần gũi, tự nhiên). 
-- TỪ VỰNG: Linh hoạt chèn các từ lóng phổ biến hiện nay (ví dụ: xịn xò, chê, đỉnh chóp, ố dề, u là trời, trầm cảm...) NẾU phù hợp với ngữ cảnh. TUYỆT ĐỐI không gò bó vào riêng ngành makeup.
-- ĐỘ DÀI: TỐI ĐA 8–12 từ/subtitle."""
+        return f"""- NHIỆM VỤ: Dịch câu sang {target_lang}.
+- VĂN PHONG: Trẻ trung, năng động, bắt trend mạng xã hội (GenZ). Dùng từ lóng nếu ngữ cảnh vui nhộn.
+- ĐỘ DÀI: TỐI ĐA 8–12 từ/subtitle để đọc kịp."""
 
     elif style_type == "pro":
-        return """- XƯNG HÔ: Ngôi 1 → "Tôi", Ngôi 2 → "Các bạn".
-- VĂN PHONG (Chuyên nghiệp): Chuẩn mực, lịch sự, rõ ràng. Phù hợp làm bản tin, video giáo dục, podcast kiến thức.
-- TỪ VỰNG: Bám sát 100% nghĩa gốc. Tuyệt đối không dùng tiếng lóng. Dùng từ ngữ phổ thông, dễ hiểu.
+        return f"""- NHIỆM VỤ: Dịch câu sang {target_lang}.
+- VĂN PHONG: Chuyên nghiệp, lịch sự, chuẩn mực ngôn ngữ báo chí/truyền hình. Tuyệt đối không dùng tiếng lóng.
 - ĐỘ DÀI: TỐI ĐA 10–14 từ/subtitle."""
 
-    else: # Normal / Việt Hóa Tự Nhiên
-        return """- XƯNG HÔ: Ngôi 1 → "Mình", Ngôi 2 → "Mọi người".
-- VĂN PHONG (Thuần Việt): DỊCH CHUẨN XÁC 100% NGHĨA GỐC NHƯNG CÂU CÚ PHẢI THUẦN VIỆT. Đọc lên phải mượt mà như người Việt đang nói chuyện với nhau.
-- TỪ VỰNG: CẤM dịch kiểu "Word-by-word" (Dịch thô cứng từ chữ sang chữ). Ưu tiên sử dụng cách diễn đạt, thành ngữ, cụm từ quen thuộc trong đời sống hàng ngày của người Việt Nam.
+    else: # Normal
+        return f"""- NHIỆM VỤ: Dịch câu sang {target_lang}.
+- VĂN PHONG: Dịch sát nghĩa gốc, diễn đạt tự nhiên như người bản xứ nói chuyện hàng ngày.
 - ĐỘ DÀI: TỐI ĐA 10–12 từ/subtitle."""
 
-def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="genz", max_retries=5):
-    print(f"   ⏳ Đang gửi AI dịch Khúc {chunk_index}/{total_chunks} (Style: {style})...")
-    style_rule = get_style_instruction(style)
+# Đã gộp và nhận đầy đủ tham số lang
+def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="normal", lang="vi", max_retries=5):
+    print(f"   ⏳ Đang gửi AI dịch Khúc {chunk_index}/{total_chunks} (Style: {style} - Ngôn ngữ: {lang})...")
+    style_rule = get_style_instruction(style, lang)
     
-    sys_instruct = f"""Nhiệm vụ: DỊCH file SRT tiếng Trung sang tiếng Việt + TỰ ĐỘNG LỌC RÁC.
+    sys_instruct = f"""Nhiệm vụ: DỊCH file SRT tiếng Trung sang ngôn ngữ đích + TỰ ĐỘNG LỌC RÁC.
 
 1. BỘ LỌC TỰ ĐỘNG: XÓA BỎ HOÀN TOÀN Lời bài hát, nhạc nền.
 
@@ -57,7 +58,7 @@ def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="g
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash-lite', # Chuyển sang 2.0 Flash cho ổn định, đỡ bị 503
+                model='gemini-2.5-flash-lite', # Có thể đổi sang gemini-2.0-flash nếu cần
                 contents=srt_chunk,
                 config=types.GenerateContentConfig(
                     system_instruction=sys_instruct,
@@ -65,7 +66,6 @@ def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="g
                 )
             )
             
-            # Đề phòng Google từ chối dịch vì tưởng nhầm là nội dung vi phạm
             if not response or not hasattr(response, 'text') or not response.text:
                 print(f"⚠️ Gemini trả về kết quả rỗng (Có thể do bộ lọc Safety).")
                 raise ValueError("Kết quả trả về rỗng")
@@ -76,7 +76,6 @@ def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="g
                 continue 
             return result_text 
         except Exception as e:
-            # IN LỖI CHI TIẾT RA RENDER ĐỂ BẮT BỆNH NẾU VẪN TẠCH
             error_msg = str(e)
             print(f"❌ LỖI GEMINI (Lần thử {attempt + 1}): {error_msg}")
             
@@ -87,7 +86,8 @@ def translate_chunk_by_ai(client, srt_chunk, chunk_index, total_chunks, style="g
                 break
     return None
 
-def process_srt_in_chunks(client, raw_chinese_content, style):
+# Đã truyền tham số lang từ tổng xuống chunk
+def process_srt_in_chunks(client, raw_chinese_content, style, lang="vi"):
     blocks = [b.strip() for b in raw_chinese_content.split('\n\n') if b.strip()]
     chunk_size = 20 
     translated_blocks = []
@@ -96,7 +96,7 @@ def process_srt_in_chunks(client, raw_chinese_content, style):
         chunk_blocks = blocks[i:i+chunk_size]
         chunk_str = '\n\n'.join(chunk_blocks)
         chunk_index = (i // chunk_size) + 1
-        result = translate_chunk_by_ai(client, chunk_str, chunk_index, total_chunks, style)
+        result = translate_chunk_by_ai(client, chunk_str, chunk_index, total_chunks, style, lang)
         if result:
             translated_blocks.extend([b.strip() for b in result.split('\n\n') if b.strip()])
         time.sleep(3) 
@@ -117,20 +117,17 @@ def process_srt_in_chunks(client, raw_chinese_content, style):
             new_id += 1
     return final_srt.strip()
 
-def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
+# Đã khai báo tham số lang ở Pipeline
+def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "normal", lang: str = "vi"):
     if not os.path.exists(video_path):
         raise FileNotFoundError(f"❌ Không tìm thấy file: {video_path}")
         
-    # Lấy Key khách nhập trên web, nếu khách không nhập thì tự động lấy Key cài sẵn trong Render
     final_gemini_key = api_key if api_key else os.environ.get("GEMINI_API_KEY")
     if not final_gemini_key:
         raise ValueError("❌ Lỗi: Chưa cung cấp API Key của Gemini!")
         
     client = genai.Client(api_key=final_gemini_key)
     
-    # ---------------------------------------------------------
-    # GỌI GROQ API SIÊU TỐC
-    # ---------------------------------------------------------
     groq_api_key = os.environ.get("GROQ_API_KEY")
     if not groq_api_key:
         raise ValueError("❌ Lỗi: Chưa cài đặt GROQ_API_KEY trong Environment variables của Render.")
@@ -141,11 +138,10 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
     audio_path = video_path + ".mp3"
     
     try:
-        # Dùng ffmpeg tách riêng phần tiếng (mp3) ra, file sẽ nhẹ đi 10 lần
         subprocess.run([
             "ffmpeg", "-y", "-i", video_path, 
-            "-vn", # Bỏ hình ảnh
-            "-acodec", "libmp3lame", "-ab", "64k", # Chuyển thành mp3 chất lượng 128kbps
+            "-vn", 
+            "-acodec", "libmp3lame", "-ab", "64k", 
             audio_path
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
     except Exception as e:
@@ -154,7 +150,6 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
     print("⏳ Đang gửi file ÂM THANH lên Groq để bóc băng (Super Fast)...")
     try:
         with open(audio_path, "rb") as file:
-            # Gửi file MP3 (cực nhẹ) thay vì file MP4
             result = groq_client.audio.transcriptions.create(
                 file=(os.path.basename(audio_path), file.read()),
                 model="whisper-large-v3-turbo", 
@@ -163,17 +158,15 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
                 temperature=0.0
             )
     except Exception as e:
-        if os.path.exists(audio_path): os.remove(audio_path) # Dọn rác nếu lỗi
+        if os.path.exists(audio_path): os.remove(audio_path)
         raise RuntimeError(f"❌ Lỗi khi bóc băng bằng Groq: {str(e)}")
         
-    # Xử lý xong thì xóa file mp3 tạm đi để tránh rác server
     if os.path.exists(audio_path): 
         os.remove(audio_path)
     
     raw_chinese_content = ""
     valid_index = 1
     
-    # Xử lý kết quả trả về từ Groq
     segments = result.segments if hasattr(result, 'segments') else result.get("segments", [])
     
     for segment in segments:
@@ -185,7 +178,6 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
         
         duration = end_time - start_time
         
-        # Logic lọc rác
         if duration > 15.0 or (len(original) > 20 and len(set(original)) < (len(original) / 3)) or len(original) < 2:
             continue
             
@@ -198,8 +190,8 @@ def run_subtitle_pipeline(video_path: str, api_key: str, style: str = "genz"):
     if not raw_chinese_content:
         raise ValueError("Lỗi: Video không có giọng nói nào hoặc quá ngắn!")
         
-    # Chuyển qua Gemini dịch
-    final_polished_content = process_srt_in_chunks(client, raw_chinese_content, style)
+    # Gọi hàm xử lý dịch với tham số lang
+    final_polished_content = process_srt_in_chunks(client, raw_chinese_content, style, lang)
     if not final_polished_content:
         raise RuntimeError("⚠️ Quá trình xử lý AI (Gemini) thất bại.")
         

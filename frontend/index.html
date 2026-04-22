@@ -1,363 +1,292 @@
 <!DOCTYPE html>
-<html lang="vi" class="dark">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViralSub - Social Growth Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0b101e; color: #e2e8f0; overflow-x: hidden; }
-        
-        /* Custom Colors matching the image */
-        .bg-navy { background-color: #0b101e; }
-        .bg-card { background-color: #131a2f; }
-        .text-cyan { color: #00f0ff; }
-        .btn-gradient { background: linear-gradient(90deg, #2563eb, #0ea5e9); }
-        .btn-gradient:hover { box-shadow: 0 0 20px rgba(14, 165, 233, 0.4); }
-        
-        .glass-panel { background: rgba(19, 26, 47, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        .glow-bg { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(11,16,30,0) 70%); z-index: -1; }
-        
-        /* Platform Cards */
-        .card-ig { background: linear-gradient(45deg, #f59e0b, #e11d48, #c026d3); }
-        .card-tk { background: #000000; }
-        .card-yt { background: #dc2626; }
-        .card-li { background: #2563eb; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ViralSub Pro</title>
 
-        .progress-fill { transition: width 0.5s ease-in-out; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-    </style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at 20% 20%, #1e293b, #020617); color: white; }
+.glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+.glow { box-shadow: 0 0 20px rgba(34,211,238,0.25); }
+.hover-scale { transition: all .25s ease; }
+.hover-scale:hover { transform: scale(1.04); }
+.bottom-sheet { transform: translate(-50%,100%); transition: all .45s cubic-bezier(0.33,1,0.68,1); }
+.bottom-sheet.active { transform: translate(-50%,0); }
+@keyframes shimmer { 0% {opacity:.5} 50% {opacity:1} 100% {opacity:.5} }
+.loading { animation: shimmer 1.5s infinite; }
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+/* Subtitle Sync Style */
+.sub-active { border-color: #22d3ee !important; background: rgba(255,255,255,0.1) !important; transform: scale(1.02); }
+</style>
 </head>
-<body class="bg-navy relative">
-    <div class="glow-bg top-[-200px] left-[-200px]"></div>
-    <div class="glow-bg top-[20%] right-[-100px]" style="background: radial-gradient(circle, rgba(192,38,211,0.1) 0%, rgba(11,16,30,0) 70%);"></div>
 
-    <nav class="w-full z-50 px-8 py-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div class="flex items-center gap-3">
-            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span class="font-bold text-xl tracking-tight text-white">ViralSub</span>
-            <span class="text-[10px] text-slate-400 -ml-1 mt-1">Social Growth Platform</span>
-        </div>
-        <div class="hidden md:flex gap-8 text-sm font-medium text-slate-400">
-            <a href="#" class="hover:text-white transition-colors">Platforms</a>
-            <a href="#" class="hover:text-white transition-colors">Services</a>
-            <a href="#" class="hover:text-white transition-colors">Reviews</a>
-            <a href="#" class="hover:text-white transition-colors">FAQ</a>
-        </div>
-        <button class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-sm px-5 py-2 rounded-lg transition-all flex items-center gap-2">
-            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Cart (0)
-        </button>
-    </nav>
+<body class="h-screen flex flex-col overflow-hidden">
 
-    <section class="max-w-7xl mx-auto px-8 pt-20 pb-16 grid lg:grid-cols-2 gap-12 items-center">
-        <div data-aos="fade-right">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-xs text-slate-300 mb-8">
-                <div class="w-2 h-2 bg-green-400 rounded-full"></div> Powered by ViralSub AI
-            </div>
-            <h1 class="text-6xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight">
-                Explode Your<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Social Media<br>Presence</span>
-            </h1>
-            <p class="text-slate-400 text-lg mb-8 leading-relaxed max-w-md">
-                Dịch thuật video siêu tốc với AI. Hàng ngàn Creator và Brand đang mở rộng quy mô đa quốc gia với công cụ của chúng tôi.
-            </p>
-            <div class="flex items-center gap-6 mb-10 text-sm font-medium text-slate-300">
-                <span class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-cyan"></i> Tốc độ siêu thực</span>
-                <span class="flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-cyan"></i> Dịch chuẩn văn phong</span>
-            </div>
-            <div class="flex gap-4">
-                <button onclick="document.getElementById('workspace').scrollIntoView({ behavior: 'smooth' })" class="btn-gradient px-8 py-4 rounded-xl font-bold text-white transition-all">
-                    Start Growing Now
-                </button>
-                <button class="bg-white hover:bg-slate-100 text-slate-900 px-8 py-4 rounded-xl font-bold transition-all">
-                    Learn How It Works
-                </button>
-            </div>
-        </div>
+<header class="h-14 px-6 flex justify-between items-center glass">
+    <div class="flex items-center gap-2">
+        <i data-lucide="video" class="text-cyan-400"></i>
+        <h1 class="font-bold text-lg bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ViralSub Pro</h1>
+    </div>
+    <div class="flex gap-3">
+        <button id="btnExportVideo" class="hidden px-4 py-1.5 rounded-full bg-cyan-500 text-black text-xs font-bold hover-scale flex items-center gap-1"><i data-lucide="film" class="w-3 h-3"></i> Xuất Video</button>
+        <button id="btnExport" class="px-4 py-1.5 rounded-full bg-white text-black text-xs font-bold hover-scale flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Tải SRT</button>
+    </div>
+</header>
 
-        <div class="bg-card rounded-[2rem] p-8 border border-slate-700/50 shadow-2xl relative" data-aos="fade-left">
-            <div class="absolute -top-4 -right-4 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/50">
-                <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2">Choose Your Platform</h3>
-            <p class="text-sm text-slate-400 mb-6">Xử lý mượt mà video từ mọi nền tảng</p>
+<main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+<section class="md:w-3/5 flex items-center justify-center relative bg-black">
+    <video id="player" class="w-full h-full object-contain hidden" controls playsinline></video>
+    <div id="uploadUI" class="flex flex-col items-center gap-4 text-gray-400 cursor-pointer hover:text-cyan-400 transition" onclick="fileInput.click()">
+        <div class="w-20 h-20 rounded-full glass flex items-center justify-center glow"><i data-lucide="upload" class="w-8 h-8"></i></div>
+        <p class="text-sm">Upload video</p>
+    </div>
+    <input type="file" id="fileInput" class="hidden" accept="video/*">
+    <div id="loading" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md z-20">
+        <div id="loadingText" class="text-cyan-400 loading text-sm font-semibold tracking-widest uppercase">AI đang xử lý...</div>
+    </div>
+</section>
+
+<section class="flex-1 flex flex-col glass border-l border-white/10">
+    <div class="p-4 text-xs uppercase opacity-40 font-bold tracking-widest flex justify-between items-center">
+        <span>Timeline Subtitles</span>
+        <span class="text-[10px] lowercase italic font-normal">* Click vào chữ để sửa trực tiếp</span>
+    </div>
+    <div id="subs" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar scroll-smooth">
+        <div class="opacity-20 text-center flex flex-col items-center mt-10">
+            <i data-lucide="list-music" class="w-10 h-10 mb-2"></i> Chưa có dữ liệu
+        </div>
+    </div>
+</section>
+</main>
+
+<nav class="h-20 flex justify-center items-center gap-16 glass border-t border-white/10 shrink-0 z-30">
+    <button onclick="openSheet('config')" class="opacity-60 hover:opacity-100 transition-opacity"><i data-lucide="settings"></i></button>
+    <button id="processBtn" class="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center glow hover-scale shadow-lg"><i data-lucide="sparkles" class="text-white"></i></button>
+    <button onclick="openSheet('style')" class="opacity-60 hover:opacity-100 transition-opacity"><i data-lucide="palette"></i></button>
+</nav>
+
+<div id="overlay" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity" onclick="closeSheets()"></div>
+
+<div id="config" class="bottom-sheet fixed bottom-0 left-1/2 w-full max-w-md glass p-6 rounded-t-3xl z-50">
+    <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6"></div>
+    <h3 class="text-center font-bold mb-4 uppercase tracking-widest text-xs text-cyan-400">Cấu hình</h3>
+    
+    <input id="password" type="password" placeholder="Password hệ thống" class="w-full p-4 rounded-xl bg-black/40 mb-4 border border-white/5 outline-none focus:border-cyan-500 transition-colors">
+    <input id="url" type="text" placeholder="Video URL (Douyin/YouTube)" class="w-full p-4 rounded-xl bg-black/40 mb-4 border border-white/5 outline-none focus:border-cyan-500 transition-colors">
+    
+    <label class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-2">Ngôn ngữ dịch ra</label>
+    <select id="lang" class="w-full p-4 rounded-xl bg-black/40 border border-white/5 outline-none focus:border-cyan-500 transition-colors text-white">
+        <option value="vi">Tiếng Việt</option>
+        <option value="en">English (Tiếng Anh)</option>
+    </select>
+
+    <button onclick="closeSheets()" class="w-full mt-6 py-4 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors">Lưu</button>
+</div>
+
+<div id="style" class="bottom-sheet fixed bottom-0 left-1/2 w-full max-w-md glass p-6 rounded-t-3xl z-50">
+    <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6"></div>
+    <h3 class="text-center font-bold mb-4 uppercase tracking-widest text-xs text-cyan-400">Phong cách AI</h3>
+    <div class="space-y-3">
+        <label class="flex justify-between items-center p-4 rounded-xl bg-black/40 border border-white/5 cursor-pointer"><span>🌐 Tự nhiên</span><input type="radio" name="style" value="normal" checked class="accent-cyan-400 w-4 h-4"></label>
+        <label class="flex justify-between items-center p-4 rounded-xl bg-black/40 border border-white/5 cursor-pointer"><span>🔥 GenZ</span><input type="radio" name="style" value="genz" class="accent-cyan-400 w-4 h-4"></label>
+        <label class="flex justify-between items-center p-4 rounded-xl bg-black/40 border border-white/5 cursor-pointer"><span>💼 Pro</span><input type="radio" name="style" value="pro" class="accent-cyan-400 w-4 h-4"></label>
+    </div>
+    <button onclick="closeSheets()" class="w-full mt-6 py-4 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors">Xác nhận</button>
+</div>
+
+<script>
+lucide.createIcons();
+
+const fileInput = document.getElementById("fileInput");
+const player = document.getElementById("player");
+const loading = document.getElementById("loading");
+
+window.currentSubs = []; // Mảng chứa dữ liệu chuẩn
+window.currentVideoPath = ""; // Lưu đường dẫn video để Hardsub
+
+fileInput.onchange = e => {
+    if(e.target.files[0]) {
+        player.src = URL.createObjectURL(e.target.files[0]);
+        player.classList.remove("hidden");
+        document.getElementById("uploadUI").classList.add("hidden");
+    }
+};
+
+// Chuyển đổi "00:00:04,400" sang giây (float)
+function timeToSeconds(t) {
+    if(!t) return 0;
+    let [h,m,s] = t.split(':');
+    return parseInt(h)*3600 + parseInt(m)*60 + parseFloat(s.replace(',', '.'));
+}
+
+document.getElementById("processBtn").onclick = async () => {
+    const file = fileInput.files[0];
+    const urlVal = document.getElementById("url").value;
+    if (!file && !urlVal) return alert("Vui lòng tải video lên hoặc nhập URL!");
+
+    document.getElementById("loadingText").innerText = "AI ĐANG BÓC BĂNG & DỊCH...";
+    loading.classList.remove("hidden");
+
+    const formData = new FormData();
+    formData.append('video', file);
+    formData.append('video_url', urlVal);
+    formData.append('style', document.querySelector('input[name="style"]:checked').value);
+    formData.append('lang', document.getElementById('lang').value);
+    formData.append('sys_password', document.getElementById("password").value);
+
+    try {
+        const response = await fetch('/run-tool', { method: 'POST', body: formData });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            window.currentVideoPath = result.data.video_url; // Lưu lại path để burn video
+            document.getElementById("btnExportVideo").classList.remove("hidden"); // Hiện nút Xuất Video
             
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="card-ig rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer hover:scale-105 transition-transform shadow-lg">
-                    <i data-lucide="instagram" class="w-8 h-8 text-white"></i><span class="text-xs font-bold text-white">Instagram</span>
-                </div>
-                <div class="card-tk rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer hover:scale-105 transition-transform shadow-lg border border-slate-700">
-                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
-                    <span class="text-xs font-bold text-white">TikTok</span>
-                </div>
-                <div class="card-yt rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer hover:scale-105 transition-transform shadow-lg">
-                    <i data-lucide="youtube" class="w-8 h-8 text-white"></i><span class="text-xs font-bold text-white">YouTube</span>
-                </div>
-                <div class="card-li rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer hover:scale-105 transition-transform shadow-lg">
-                    <i data-lucide="linkedin" class="w-8 h-8 text-white"></i><span class="text-xs font-bold text-white">LinkedIn</span>
-                </div>
-            </div>
-            <button onclick="document.getElementById('workspace').scrollIntoView({ behavior: 'smooth' })" class="w-full btn-gradient py-4 rounded-xl font-bold text-white transition-all flex justify-center items-center gap-2">
-                Get Started <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
-        </div>
-    </section>
-
-    <section class="max-w-7xl mx-auto px-8 py-16 text-center">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-xs text-slate-300 mb-8" data-aos="fade-up">
-            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div> Live platform statistics
-        </div>
-        <h2 class="text-4xl md:text-5xl font-bold text-white mb-4" data-aos="fade-up" data-aos-delay="100">
-            Thousands of videos translated — and<br>counting!
-        </h2>
-        <p class="text-slate-400 mb-16" data-aos="fade-up" data-aos-delay="200">Trusted by content creators worldwide</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="bg-card rounded-2xl p-8 border border-slate-800 hover:border-slate-600 transition-colors">
-                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-6"><span class="font-bold text-white text-xl">4</span></div>
-                <h4 class="font-bold text-white mb-2">Platforms</h4>
-                <p class="text-xs text-slate-400">Instagram, TikTok, YouTube, LinkedIn</p>
-            </div>
-            <div class="bg-card rounded-2xl p-8 border border-slate-800 hover:border-slate-600 transition-colors">
-                <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-6"><i data-lucide="zap" class="w-6 h-6 text-white"></i></div>
-                <h4 class="font-bold text-white mb-2">Super Fast</h4>
-                <p class="text-xs text-slate-400">Start seeing results within seconds</p>
-            </div>
-            <div class="bg-card rounded-2xl p-8 border border-slate-800 hover:border-slate-600 transition-colors">
-                <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mx-auto mb-6"><i data-lucide="trending-up" class="w-6 h-6 text-white"></i></div>
-                <h4 class="font-bold text-white mb-2">Scalable Growth</h4>
-                <p class="text-xs text-slate-400">Built to grow with your success</p>
-            </div>
-            <div class="bg-card rounded-2xl p-8 border border-slate-800 hover:border-slate-600 transition-colors">
-                <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mx-auto mb-6"><i data-lucide="sparkles" class="w-6 h-6 text-white"></i></div>
-                <h4 class="font-bold text-white mb-2">Premium Quality</h4>
-                <p class="text-xs text-slate-400">High quality translation & styling</p>
-            </div>
-        </div>
-    </section>
-
-    <hr class="border-slate-800 max-w-7xl mx-auto my-8">
-
-    <main id="workspace" class="max-w-[1400px] mx-auto px-6 pb-20 mt-10">
-        <div class="mb-8 flex items-center gap-3" data-aos="fade-right">
-            <div class="w-3 h-8 bg-blue-500 rounded-full"></div>
-            <h2 class="text-2xl font-bold text-white">ViralSub <span class="text-blue-400">Workspace</span></h2>
-        </div>
-
-        <div class="flex flex-col lg:flex-row gap-6 items-stretch h-[700px]">
-            
-            <aside class="w-full lg:w-80 glass-panel rounded-3xl p-6 flex flex-col gap-6 shrink-0 overflow-y-auto custom-scrollbar" data-aos="fade-up">
-                
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Mật khẩu hệ thống</label>
-                    <input type="password" id="sysPassword" placeholder="Nhập pass..." class="w-full bg-[#0b101e] border border-slate-700/50 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition-colors text-white">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Nguồn Video</label>
-                    <div id="drop-zone" class="border-2 border-dashed border-slate-600 hover:border-blue-500 bg-[#0b101e]/50 rounded-2xl p-6 text-center cursor-pointer transition-all group">
-                        <input type="file" id="videoFile" class="hidden">
-                        <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-500 mx-auto mb-3 group-hover:text-blue-400 transition-colors"></i>
-                        <p class="text-sm font-medium text-slate-300" id="fileNameDisplay">Click tải file lên</p>
-                    </div>
-                    <input type="text" id="videoUrl" placeholder="Hoặc dán URL YouTube/Douyin..." class="mt-2 w-full bg-[#0b101e] border border-slate-700/50 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 text-white">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Văn phong dịch</label>
-                    <select id="styleSelect" class="w-full bg-[#0b101e] border border-slate-700/50 rounded-xl px-4 py-3 text-sm outline-none cursor-pointer text-white">
-                        <option value="normal">🌐 Thuần Việt tự nhiên</option>
-                        <option value="genz">🔥 Bắt Trend (GenZ)</option>
-                        <option value="pro">💼 Chuyên nghiệp (Tin tức)</option>
-                    </select>
-                </div>
-
-                <button id="btnProcess" class="mt-auto btn-gradient w-full py-4 rounded-xl font-bold text-white shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
-                    <i data-lucide="play" class="w-5 h-5"></i> BẮT ĐẦU XỬ LÝ
-                </button>
-            </aside>
-
-            <section class="flex-1 flex flex-col gap-6 min-w-0" data-aos="fade-up" data-aos-delay="200">
-                
-                <div class="glass-panel rounded-3xl overflow-hidden shrink-0 h-[50%] flex items-center justify-center relative bg-black/50">
-                    <video id="player" controls class="w-full h-full hidden"></video>
-                    
-                    <div id="video-placeholder" class="flex flex-col items-center gap-4 text-slate-500">
-                        <div class="w-16 h-16 rounded-full bg-[#0b101e] flex items-center justify-center border border-slate-700 shadow-xl">
-                            <i data-lucide="film" class="w-8 h-8 text-blue-500"></i>
-                        </div>
-                        <p class="text-sm font-medium">Bảng điều khiển Video</p>
-                    </div>
-
-                    <div id="progressPanel" class="hidden absolute inset-0 bg-[#0b101e]/90 backdrop-blur-sm flex flex-col items-center justify-center p-8 z-10">
-                        <i data-lucide="loader-2" class="w-10 h-10 text-blue-500 animate-spin mb-6"></i>
-                        <h3 class="font-bold text-white text-lg mb-2">Hệ thống đang bóc băng & Dịch thuật...</h3>
-                        <div class="w-full max-w-md bg-slate-800 rounded-full h-2 mt-4 overflow-hidden">
-                            <div id="progressBar" class="progress-fill h-full btn-gradient w-0 rounded-full"></div>
-                        </div>
-                        <p id="progressPercent" class="text-blue-400 font-bold mt-2">0%</p>
-                    </div>
-                </div>
-
-                <div class="flex-1 grid grid-cols-2 gap-6 min-h-0">
-                    
-                    <div class="glass-panel rounded-3xl flex flex-col overflow-hidden">
-                        <div class="p-4 border-b border-slate-700/50 flex justify-between items-center bg-[#0b101e]/50">
-                            <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Tiếng Trung (Gốc)</span>
-                        </div>
-                        <div id="zhContent" class="flex-1 overflow-y-auto p-5 custom-scrollbar space-y-3">
-                            <p class="text-slate-600 text-center mt-10 text-sm italic">Chưa có dữ liệu</p>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel rounded-3xl flex flex-col overflow-hidden border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
-                        <div class="p-4 border-b border-blue-500/20 flex justify-between items-center bg-blue-500/10">
-                            <span class="text-[10px] font-black uppercase text-blue-400 tracking-widest">Tiếng Việt (Gemini)</span>
-                            <button id="btnDownload" class="btn-gradient text-xs px-4 py-1.5 rounded-lg text-white font-bold transition-all hover:scale-105 flex items-center gap-1.5">
-                                <i data-lucide="download" class="w-3 h-3"></i> TẢI .SRT
-                            </button>
-                        </div>
-                        <div id="viContent" class="flex-1 overflow-y-auto p-5 custom-scrollbar space-y-3">
-                            <p class="text-slate-600 text-center mt-10 text-sm italic">Chưa có dữ liệu</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <footer class="py-6 text-center text-slate-600 text-xs mt-10 border-t border-slate-800">
-        <p>© 2026 ViralSub Platform. Secure & Verified.</p>
-    </footer>
-
-    <script>
-        AOS.init({ duration: 800, once: true });
-        lucide.createIcons();
-
-        const dropZone = document.getElementById('drop-zone');
-        const videoFile = document.getElementById('videoFile');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const progressPanel = document.getElementById('progressPanel');
-        const progressBar = document.getElementById('progressBar');
-        const progressPercent = document.getElementById('progressPercent');
-        
-        let rawViSrtData = ""; // Lưu trữ bản dịch thô
-
-        dropZone.onclick = () => videoFile.click();
-        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('border-blue-500'); };
-        dropZone.ondragleave = () => dropZone.classList.remove('border-blue-500');
-        dropZone.ondrop = (e) => {
-            e.preventDefault(); dropZone.classList.remove('border-blue-500');
-            videoFile.files = e.dataTransfer.files; handleFileSelect();
-        };
-        videoFile.onchange = handleFileSelect;
-
-        function handleFileSelect() {
-            if (videoFile.files.length) {
-                fileNameDisplay.textContent = videoFile.files[0].name;
-                fileNameDisplay.classList.add('text-blue-400');
+            if (result.data.video_url) {
+                player.src = result.data.video_url;
+                player.classList.remove("hidden");
+                document.getElementById("uploadUI").classList.add("hidden");
             }
-        }
 
-        document.getElementById('btnProcess').onclick = async () => {
-            if (!videoFile.files[0] && !document.getElementById('videoUrl').value) return alert('Vui lòng cung cấp video!');
+            // Parse dữ liệu từ server thành Object
+            window.currentSubs = [];
+            const viBlocks = result.data.vi_srt.split('\n\n').filter(b => b.trim());
+            const zhBlocks = (result.data.zh_srt || "").split('\n\n').filter(b => b.trim());
 
-            progressPanel.classList.remove('hidden');
-            document.getElementById('video-placeholder').classList.add('hidden');
-            updateProgress(15);
-
-            const formData = new FormData();
-            formData.append('video', videoFile.files[0]);
-            formData.append('video_url', document.getElementById('videoUrl').value);
-            formData.append('style', document.getElementById('styleSelect').value);
-            formData.append('sys_password', document.getElementById('sysPassword').value);
-
-            try {
-                setTimeout(() => updateProgress(45), 2000);
-                const response = await fetch('/run-tool', { method: 'POST', body: formData });
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    updateProgress(100);
-                    rawViSrtData = result.data.vi_srt; 
-                    
-                    setTimeout(() => {
-                        progressPanel.classList.add('hidden');
-                        const player = document.getElementById('player');
-                        player.src = result.data.video_url;
-                        player.classList.remove('hidden');
-                        
-                        renderSub(result.data.zh_srt, 'zhContent');
-                        renderSub(result.data.vi_srt, 'viContent');
-                    }, 500);
-                } else throw new Error(result.detail);
-            } catch (err) {
-                alert('Lỗi: ' + err.message);
-                progressPanel.classList.add('hidden');
-                document.getElementById('video-placeholder').classList.remove('hidden');
-            }
-        };
-
-        function updateProgress(p) {
-            progressBar.style.width = p + '%';
-            progressPercent.textContent = p + '%';
-        }
-
-        function renderSub(srt, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = srt.split('\n\n').filter(b => b.trim()).map(block => {
+            viBlocks.forEach((block, i) => {
                 const lines = block.split('\n');
-                // Bỏ dòng số thứ tự đi khi hiển thị UI cho đẹp, chỉ lấy thời gian và text
-                const timeLine = lines.find(l => l.includes('-->')) || '';
-                const textIndex = lines.indexOf(timeLine) + 1;
-                const text = lines.slice(textIndex).join('<br>');
+                const timeLine = lines.find(l => l.includes('-->'));
+                if(!timeLine) return;
                 
-                return `<div class="p-3 bg-[#0b101e]/50 hover:bg-[#131a2f] rounded-xl border border-transparent hover:border-slate-700 transition-all">
-                    <span class="text-[10px] font-mono text-slate-500 block mb-1.5">${timeLine}</span>
-                    <p class="text-sm font-medium ${containerId === 'viContent' ? 'text-blue-100' : 'text-slate-300'}">${text}</p>
-                </div>`;
-            }).join('');
-        }
-
-        // BỘ CỨU HỘ SRT: ÉP CHUẨN ĐỊNH DẠNG 100% CHO CAPCUT
-        document.getElementById('btnDownload').onclick = () => {
-            // Lấy toàn bộ các khối hiển thị Sub từ màn hình giao diện
-            const viContentDiv = document.getElementById('viContent');
-            const subBlocks = viContentDiv.querySelectorAll('div.p-3');
-            
-            if (subBlocks.length === 0 || !rawViSrtData) return alert('Chưa có dữ liệu để tải!');
-            
-            let finalSrt = "";
-            
-            // Quét từng khối Sub trên màn hình và tự động đánh số
-            subBlocks.forEach((block, index) => {
-                // 1. Lấy thời gian từ thẻ span
-                const timeStr = block.querySelector('span').innerText.trim();
-                
-                // 2. Lấy nội dung chữ từ thẻ p, chuyển <br> thành xuống dòng chuẩn
-                let textStr = block.querySelector('p').innerHTML.replace(/<br\s*[\/]?>/gi, '\n');
-                
-                // Lọc bỏ các mã HTML thừa để chữ sạch 100%
-                const tempDiv = document.createElement("div");
-                tempDiv.innerHTML = textStr;
-                textStr = (tempDiv.textContent || tempDiv.innerText || "").trim();
-
-                // 3. Ráp lại chuẩn format CapCut: SỐ -> THỜI GIAN -> CHỮ -> DÒNG TRỐNG
-                finalSrt += `${index + 1}\n${timeStr}\n${textStr}\n\n`;
+                const [startStr, endStr] = timeLine.split(' --> ');
+                window.currentSubs.push({
+                    index: i,
+                    time: timeLine,
+                    start: timeToSeconds(startStr),
+                    end: timeToSeconds(endStr),
+                    textVi: lines.slice(lines.indexOf(timeLine) + 1).join('\n'),
+                    textZh: zhBlocks[i] ? zhBlocks[i].split('\n').slice(1).join('\n') : ""
+                });
             });
 
-            // 4. Ép mã \ufeff (UTF-8 BOM) để chống lỗi font Tiếng Việt
-            const blob = new Blob(["\ufeff" + finalSrt.trim()], { type: 'text/srt;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
+            renderSubsUI();
+        } else throw new Error(result.detail);
+    } catch (err) { alert("Lỗi: " + err.message); } 
+    finally { loading.classList.add("hidden"); }
+};
+
+function renderSubsUI(){
+    const container = document.getElementById("subs");
+    container.innerHTML = "";
+
+    window.currentSubs.forEach((sub) => {
+        const div = document.createElement("div");
+        div.id = `sub-card-${sub.index}`;
+        div.className="sub-item p-4 rounded-xl glass border border-transparent cursor-pointer group transition-all duration-300";
+        
+        div.innerHTML=`
+        <div class="flex justify-between items-center mb-1.5" onclick="tuaVideo(${sub.start})">
+            <div class="text-[10px] font-mono text-cyan-400 bg-black/40 px-2 py-0.5 rounded">${sub.time}</div>
+            <i data-lucide="play-circle" class="w-4 h-4 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </div>
+        <div class="text-[11px] opacity-40 mb-1 italic font-light">${sub.textZh}</div>
+        <div contenteditable="true" onblur="updateSubText(${sub.index}, this.innerText)" class="text-sm font-medium text-white outline-none focus:bg-white/10 focus:ring-1 focus:ring-cyan-400 rounded p-1">${sub.textVi}</div>
+        `;
+        container.appendChild(div);
+    });
+    lucide.createIcons();
+}
+
+function tuaVideo(seconds) {
+    player.currentTime = seconds;
+    player.play();
+}
+
+// INLINE EDIT: Cập nhật mảng khi sửa chữ
+window.updateSubText = function(index, newText) {
+    if(window.currentSubs[index]) {
+        window.currentSubs[index].textVi = newText.trim();
+    }
+}
+
+// AUTO-SCROLL: Đồng bộ Video với Subtitle
+let lastActiveIndex = -1;
+player.addEventListener('timeupdate', () => {
+    if(!window.currentSubs || window.currentSubs.length === 0) return;
+    const t = player.currentTime;
+    let activeIndex = -1;
+    
+    window.currentSubs.forEach((sub, i) => {
+        if(t >= sub.start && t <= sub.end) activeIndex = i;
+    });
+
+    if (activeIndex !== lastActiveIndex) {
+        document.querySelectorAll('.sub-item').forEach(el => el.classList.remove('sub-active'));
+        if(activeIndex !== -1) {
+            const activeCard = document.getElementById(`sub-card-${activeIndex}`);
+            if(activeCard) {
+                activeCard.classList.add('sub-active');
+                activeCard.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }
+        }
+        lastActiveIndex = activeIndex;
+    }
+});
+
+// TẠO FILE SRT CHUẨN TỪ MẢNG DỮ LIỆU
+function generateSrtString() {
+    let finalSrt = "";
+    window.currentSubs.forEach((sub, i) => {
+        finalSrt += `${i + 1}\n${sub.time}\n${sub.textVi}\n\n`;
+    });
+    return finalSrt.trim();
+}
+
+document.getElementById("btnExport").onclick = () => {
+    if (window.currentSubs.length === 0) return alert("Chưa có dữ liệu!");
+    const blob = new Blob(["\ufeff" + generateSrtString()], { type: 'text/srt;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'ViralSub_Pro.srt'; a.click();
+};
+
+// XUẤT VIDEO (HARDSUB) BẰNG FFMPEG TRÊN BACKEND
+document.getElementById("btnExportVideo").onclick = async () => {
+    if (!window.currentVideoPath || window.currentSubs.length === 0) return alert("Chưa có video hoặc phụ đề!");
+    
+    document.getElementById("loadingText").innerText = "ĐANG ÉP CHỮ VÀO VIDEO (VUI LÒNG ĐỢI)...";
+    loading.classList.remove("hidden");
+
+    const formData = new FormData();
+    formData.append("video_path", window.currentVideoPath);
+    formData.append("srt_content", generateSrtString());
+
+    try {
+        const response = await fetch('/burn-video', { method: 'POST', body: formData });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            // Tải video thẳng về máy
             const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ViralSub_CapCut_Chuan.srt';
+            a.href = result.video_url;
+            a.download = 'ViralSub_Hardsub.mp4';
             a.click();
-        };
-    </script>
+            alert("Đã ép chữ xong! Video đang được tải về.");
+        } else throw new Error(result.detail);
+    } catch (err) { alert("Lỗi ép video: " + err.message); } 
+    finally { loading.classList.add("hidden"); }
+};
+
+const overlay = document.getElementById("overlay");
+function openSheet(id) { overlay.classList.remove("hidden"); document.getElementById(id).classList.add("active"); }
+function closeSheets() { overlay.classList.add("hidden"); document.querySelectorAll(".bottom-sheet").forEach(s=>s.classList.remove("active")); }
+</script>
 </body>
 </html>

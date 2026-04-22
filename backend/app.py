@@ -45,19 +45,18 @@ def download_video_from_url(url: str, output_path: str):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
+# Sửa lại hàm process_video hiện tại một chút để nhận tham số lang
 @app.post("/run-tool")
 async def process_video(
     video: UploadFile = File(None),
     video_url: str = Form(None),
-    api_key: str = Form(""), # Để trống sẽ dùng Key trong Render
-    style: str = Form("genz"),
+    api_key: str = Form(""),
+    style: str = Form("normal"),
+    lang: str = Form("vi"), # <--- THÊM DÒNG NÀY (Đa ngôn ngữ)
     sys_password: str = Form("")
 ):
-    # 1. Kiểm tra mật khẩu hệ thống
     if sys_password != SYSTEM_PASSWORD:
-        raise HTTPException(status_code=401, detail="⛔ Sai mật khẩu hệ thống! Vui lòng kiểm tra lại.")
-
-    # 2. Kiểm tra đầu vào
+        raise HTTPException(status_code=401, detail="⛔ Sai mật khẩu hệ thống!")
     if not video and not video_url:
         raise HTTPException(status_code=400, detail="Vui lòng upload video hoặc nhập URL!")
 
@@ -65,32 +64,68 @@ async def process_video(
     temp_video_path = os.path.join(TEMP_DIR, temp_filename)
     
     try:
-        # 3. Thu thập file video (Upload hoặc Download)
         if video:
             with open(temp_video_path, "wb") as buffer:
                 shutil.copyfileobj(video.file, buffer)
         elif video_url:
             download_video_from_url(video_url, temp_video_path)
 
-        # 4. Chạy Pipeline xử lý (Groq bóc băng -> Gemini dịch)
-        # Hàm này trả về: Sub tiếng Trung và Sub tiếng Việt
-        raw_zh, final_vi = run_subtitle_pipeline(temp_video_path, api_key, style)
+        # Chú ý truyền thêm lang vào hàm core logic
+        raw_zh, final_vi = run_subtitle_pipeline(temp_video_path, api_key, style, lang)
         
-        # 5. Trả kết quả về cho giao diện 3 cột
         return {
             "status": "success",
             "data": {
                 "zh_srt": raw_zh,
                 "vi_srt": final_vi,
-                "video_url": f"/temp_uploads/{temp_filename}" # Đường dẫn để Player trên Web load video
+                "video_url": f"/temp_uploads/{temp_filename}" 
             }
         }
-
     except Exception as e:
-        # Nếu lỗi thì dọn dẹp file tạm để tránh đầy rác server
-        if os.path.exists(temp_video_path): 
-            os.remove(temp_video_path)
+        if os.path.exists(temp_video_path): os.remove(temp_video_path)
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==========================================
+# GIAI ĐOẠN 2: API ÉP CHỮ VÀO VIDEO (HARDSUB)
+# ==========================================
+@app.post("/burn-video")
+async def burn_video(
+    video_path: str = Form(...), # VD: /temp_uploads/abc.mp4
+    srt_content: str = Form(...)
+):
+    import subprocess
+    # Lấy đường dẫn file thật trên hệ thống
+    filename = os.path.basename(video_path)
+    actual_video_path = os.path.join(TEMP_DIR, filename)
+    
+    if not os.path.exists(actual_video_path):
+        raise HTTPException(status_code=400, detail="Video gốc đã bị xóa khỏi server. Vui lòng dịch lại!")
+
+    # Lưu SRT tạm để FFmpeg đọc
+    srt_filename = f"{filename}.srt"
+    srt_path = os.path.join(TEMP_DIR, srt_filename)
+    with open(srt_path, "w", encoding="utf-8") as f:
+        f.write(srt_content)
+
+    # File output xuất ra
+    output_filename = filename.replace(".mp4", "_hardsub.mp4")
+    output_path = os.path.join(TEMP_DIR, output_filename)
+
+    try:
+        # Lệnh FFMPEG ghi thẳng phụ đề vào hình ảnh video
+        # -vf "subtitles=..." là bộ lọc ép chữ. Chú ý: FFMPEG trên Linux yêu cầu đường dẫn sub phải cẩn thận
+        sub_filter = f"subtitles=temp_uploads/{srt_filename}"
+        
+        subprocess.run([
+            "ffmpeg", "-y", "-i", actual_video_path,
+            "-vf", sub_filter,
+            "-c:a", "copy", # Giữ nguyên chất lượng âm thanh gốc
+            output_path
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        return {"status": "success", "video_url": f"/temp_uploads/{output_filename}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi khi burn video: {str(e)}")
 
 # --- CẤU HÌNH PHỤC VỤ FILE TĨNH ---
 
